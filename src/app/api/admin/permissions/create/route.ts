@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { adminDb } from '../../../../../lib/firebase-admin'
+import { getAdminDb } from '../../../../../lib/firebase-admin'
 import { verifyAdmin, errResponse } from '../../_adminGuard'
 import { ApiError } from '../../../_server'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -19,10 +19,10 @@ export async function POST(req: NextRequest) {
     const slug = key.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
     if (!slug) throw new ApiError(400, 'Permission key must contain valid characters')
 
-    const existing = await adminDb.collection('permissions').where('key', '==', slug).get()
+    const existing = await getAdminDb().collection('permissions').where('key', '==', slug).get()
     if (!existing.empty) throw new ApiError(409, 'A permission with this key already exists')
 
-    const ref = adminDb.collection('permissions').doc()
+    const ref = getAdminDb().collection('permissions').doc()
     await ref.set({
       id: ref.id,
       key: slug,

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { adminDb } from '../../../../../lib/firebase-admin'
+import { getAdminDb } from '../../../../../lib/firebase-admin'
 import { verifyAdmin, errResponse } from '../../_adminGuard'
 import { ApiError } from '../../../_server'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -15,10 +15,10 @@ export async function POST(req: NextRequest) {
 
     if (!name?.trim()) throw new ApiError(400, 'Role name is required')
 
-    const existing = await adminDb.collection('roles').where('name', '==', name.trim()).get()
+    const existing = await getAdminDb().collection('roles').where('name', '==', name.trim()).get()
     if (!existing.empty) throw new ApiError(409, 'A role with this name already exists')
 
-    const ref = adminDb.collection('roles').doc()
+    const ref = getAdminDb().collection('roles').doc()
     await ref.set({
       id: ref.id,
       name: name.trim(),

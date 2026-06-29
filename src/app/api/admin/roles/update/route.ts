@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { adminDb } from '../../../../../lib/firebase-admin'
+import { getAdminDb } from '../../../../../lib/firebase-admin'
 import { verifyAdmin, errResponse } from '../../_adminGuard'
 import { ApiError } from '../../../_server'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     if (!id) throw new ApiError(400, 'Role id is required')
 
-    const snap = await adminDb.collection('roles').doc(id).get()
+    const snap = await getAdminDb().collection('roles').doc(id).get()
     if (!snap.exists) throw new ApiError(404, 'Role not found')
     if (snap.data()?.isSystem) throw new ApiError(403, 'System roles cannot be modified')
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     if (description !== undefined) updates.description = description.trim()
     if (permissions !== undefined) updates.permissions = permissions
 
-    await adminDb.collection('roles').doc(id).update(updates)
+    await getAdminDb().collection('roles').doc(id).update(updates)
     return Response.json({ ok: true })
   } catch (err) {
     return errResponse(err)
